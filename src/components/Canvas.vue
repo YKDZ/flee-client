@@ -2,9 +2,9 @@
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import paper from 'paper'
 import { useCanvasStore } from '../stores/canvas'
-import { useMapStore } from '../stores/map';
-import { useProfileStore } from '../stores/profile';
-import { storeToRefs } from 'pinia';
+import { useMapStore } from '../stores/map'
+import { useProfileStore } from '../stores/profile'
+import { storeToRefs } from 'pinia'
 
 const canvas = useCanvasStore()
 const profile = useProfileStore()

@@ -2,10 +2,8 @@
 import Canvas from './components/Canvas.vue'
 import ZoomBar from './components/ZoomBar.vue'
 import { useCanvasStore } from './stores/canvas'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
 import RotateBar from './components/RotateBar.vue'
-import Persons from './components/Persons.vue'
-import Nodes from './components/Nodes.vue'
 import ToolBar from './components/ToolBar.vue'
 import { isMobile } from './utils/mobile'
 
@@ -36,18 +34,18 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
 })
+
+const Persons = defineAsyncComponent(() => import('./components/Persons.vue'))
+const Nodes = defineAsyncComponent(() => import('./components/Nodes.vue'))
 </script>
 
 <template>
-  <div class="w-screen h-screen bg-red flex" :class="{ 'justify-center': xCenterable, 'items-center': yCenterable, 'fixed': isMobile() }">
+  <div class="w-screen h-screen bg-red flex"
+    :class="{ 'justify-center': xCenterable, 'items-center': yCenterable, 'fixed': isMobile() }">
     <Canvas />
   </div>
-  <Suspense>
-    <Persons />
-  </Suspense>
-  <Suspense>
-    <Nodes />
-  </Suspense>
+  <Persons />
+  <Nodes />
   <ZoomBar />
   <RotateBar />
   <ToolBar />
