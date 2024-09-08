@@ -20,7 +20,7 @@ const updateCanvas = () => {
   paper.setup(canvasEl.value as HTMLCanvasElement)
   // 创建背景图层
   backgroundLayer.value = new paper.Layer()
-  raster.value = new paper.Raster('src/assets/test-map.png')
+  raster.value = new paper.Raster('test-map.png')
   
   // 应用图片缩放
   raster.value?.scale(canvas.scale)

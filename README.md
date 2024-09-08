@@ -1,6 +1,6 @@
 # Flee Client
 
-![PC 端效果图](public/showcase-pc.png)
+![PC 端效果图](docs/showcase-pc.png)
 
 ## Todo
 
