@@ -159,5 +159,5 @@ watch(() => profile.showPath, () => {
 </script>
 
 <template>
-  <canvas id="canvas" ref="canvasEl" class="max-w-none transition-transform -z-50"></canvas>
+  <canvas id="canvas" ref="canvasEl" class="-z-50"></canvas>
 </template>
