@@ -7,18 +7,26 @@ import RotateBar from './components/RotateBar.vue'
 import Persons from './components/Persons.vue'
 import Nodes from './components/Nodes.vue'
 import ToolBar from './components/ToolBar.vue'
+import { isMobile } from './utils/mobile'
 
 const canvas = useCanvasStore()
 
 const viewPointWidth = ref(window.innerWidth)
-const centerable = computed(() => {
+const viewPointHeight = ref(window.innerHeight)
+const xCenterable = computed(() => {
   return canvas.width < viewPointWidth.value
+})
+const yCenterable = computed(() => {
+  return canvas.height < viewPointHeight.value
 })
 
 const handleResize = () => {
   if (window.innerWidth != viewPointWidth.value) {
-      viewPointWidth.value = window.innerWidth
-    }
+    viewPointWidth.value = window.innerWidth
+  }
+  if (window.innerHeight != viewPointHeight.value) {
+    viewPointHeight.value = window.innerHeight
+  }
 }
 
 onMounted(() => {
@@ -31,7 +39,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div :class="{ 'flex justify-center': centerable }">
+  <div class="w-screen h-screen bg-red flex" :class="{ 'justify-center': xCenterable, 'items-center': yCenterable, 'fixed': isMobile() }">
     <Canvas />
   </div>
   <Suspense>
