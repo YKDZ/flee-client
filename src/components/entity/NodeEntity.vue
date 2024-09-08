@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useCanvasStore } from '../../stores/canvas'
-import { Node, useMapStore } from '../../stores/map'
+import { Node } from '../../stores/map'
 import { storeToRefs } from 'pinia'
 import paper from 'paper'
 

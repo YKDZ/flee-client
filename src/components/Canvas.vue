@@ -4,6 +4,7 @@ import paper from 'paper'
 import { useCanvasStore } from '../stores/canvas'
 import { useMapStore } from '../stores/map';
 import { useProfileStore } from '../stores/profile';
+import { storeToRefs } from 'pinia';
 
 const canvas = useCanvasStore()
 const profile = useProfileStore()
@@ -12,6 +13,7 @@ const canvasEl = ref<HTMLCanvasElement | null>(null)
 const raster = ref<paper.Raster>()
 const backgroundLayer = ref<paper.Layer>()
 const arrowLayer = ref<paper.Layer>()
+const { isUpdate } = storeToRefs(canvas)
 
 // 更新画布，创建背景图层和箭头图层
 const updateCanvas = () => {
@@ -159,5 +161,5 @@ watch(() => profile.showPath, () => {
 </script>
 
 <template>
-  <canvas id="canvas" ref="canvasEl" class="-z-50"></canvas>
+  <canvas v-show="isUpdate" id="canvas" ref="canvasEl" class="-z-50"></canvas>
 </template>
