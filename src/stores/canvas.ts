@@ -12,9 +12,7 @@ export const useCanvasStore = defineStore('canvas', () => {
     const scaledWidth = computed(() => width.value * scale.value)
     const scaledHeight = computed(() => height.value * scale.value)
     const scale = ref(1)
-    const lastScale = ref(1)
     const rotate = ref(0)
-    const lastRotate = ref(0)
     const isWellDrawn = ref(false)
     const isChanging = ref(false)
 
@@ -39,7 +37,6 @@ export const useCanvasStore = defineStore('canvas', () => {
         let changedValue = scale.value + amount
         if (changedValue > scaleUpperBound) changedValue = scaleUpperBound
         if (changedValue < scaleLowerBound) changedValue = scaleLowerBound
-        lastScale.value = scale.value
         scale.value = changedValue
         isWellDrawn.value = false
     }
@@ -48,7 +45,6 @@ export const useCanvasStore = defineStore('canvas', () => {
         let changedValue = rotate.value + amount
         if (changedValue > 2 * Math.PI) changedValue = changedValue - 2 * Math.PI
         if (changedValue < 0) changedValue = 2 * Math.PI + changedValue
-        lastRotate.value = rotate.value
         rotate.value = changedValue
         isWellDrawn.value = false
     }
@@ -61,9 +57,7 @@ export const useCanvasStore = defineStore('canvas', () => {
         scaledWidth,
         scaledHeight,
         scale,
-        lastScale,
         rotate,
-        lastRotate,
         isWellDrawn,
         changeScale,
         changeRotate,

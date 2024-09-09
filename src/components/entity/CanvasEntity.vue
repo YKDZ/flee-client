@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, watchEffect } from 'vue'
 import { useCanvasStore } from '../../stores/canvas'
+import { storeToRefs } from 'pinia';
 
 const props = defineProps<{
     x: number,
@@ -10,6 +11,7 @@ const props = defineProps<{
 const center = ref<HTMLParagraphElement>()
 const iconRef = ref<HTMLParagraphElement>()
 const canvas = useCanvasStore()
+const { isWellDrawn } = storeToRefs(canvas)
 
 // 位置是否已经更新完毕
 const isPrepared = ref(false)
@@ -22,7 +24,7 @@ const updatePos = async () => {
     }
 
     isPrepared.value = false
-    
+
     const offsetX = -5 * canvas.scale + parseFloat(canvas.canvasEl.style.left.substring(0, canvas.canvasEl.style.left.length - 2))
     const offsetY = -20 * canvas.scale + parseFloat(canvas.canvasEl.style.top.substring(0, canvas.canvasEl.style.top.length - 2)) || 0
     // 坐标零点在视口左上角
@@ -46,8 +48,13 @@ const updatePos = async () => {
     isPrepared.value = true
 }
 
-onMounted(updatePos)
-watch(() => canvas.isWellDrawn, updatePos)
+onMounted(() => {
+    watchEffect(() => {
+        if (isWellDrawn.value) {
+            updatePos()
+        }
+    })
+})
 // 跟随方案
 setInterval(() => {
     if (canvas.isChanging) {
@@ -59,8 +66,8 @@ setInterval(() => {
 //     if (canvas.isChanging) {
 //         isPrepared.value = false
 //     } else {
-//         isPrepared.value = true
 //         updatePos()
+//         isPrepared.value = true
 //     }
 // })
 </script>
@@ -69,5 +76,5 @@ setInterval(() => {
     <p ref="iconRef" v-show="isPrepared" class="fixed select-none">
         <slot></slot>
     </p>
-    <p ref="center" v-show="isPrepared" class="bg-red-500 w-5 h-5 fixed"></p>
+    <!-- <p ref="center" v-show="isPrepared" class="bg-red-500 w-5 h-5 fixed"></p> -->
 </template>

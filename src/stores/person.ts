@@ -14,7 +14,7 @@ export const usePersonStore = defineStore('person', () => {
     // REST API
     const fetchPersons = async (): Promise<Person[]> => {
         return [
-            new Person(4, 743, 556),
+            new Person(4, 743, 500),
             new Person(9, 853, 425),
             new Person(10, 857, 345),
             new Person(11, 932, 346),

@@ -6,7 +6,7 @@ import { useMapStore } from '../stores/map'
 import { useProfileStore } from '../stores/profile'
 import { storeToRefs } from 'pinia'
 import mapURL from '/test-map.png'
-import { useDraggable } from '@vueuse/core'
+import { Position, useDraggable } from '@vueuse/core'
 
 const canvas = useCanvasStore()
 const profile = useProfileStore()
@@ -23,47 +23,54 @@ const initCanvas = () => {
   paper.setup(canvasEl.value)
   // 创建背景图层
   backgroundLayer.value = new paper.Layer()
+  backgroundLayer.value!.locked = true
+  // 加载地图
   raster.value = new paper.Raster(mapURL)
 
   raster.value.onLoad = () => {
     if (!canvasEl.value || !raster.value) return
 
-    if (!canvas.isSetup) {
-      canvas.setup(canvasEl.value, raster.value)
-    }
+    if (!canvas.isSetup) canvas.setup(canvasEl.value, raster.value)
 
-    raster.value?.scale(canvas.scale)
-    canvasEl.value.width = canvas.scaledWidth
-    canvasEl.value.height = canvas.scaledHeight
-    canvasEl.value.style.width = canvas.scaledWidth + 'px'
-    canvasEl.value.style.height = canvas.scaledHeight + 'px'
-    canvasEl.value.style.rotate = canvas.rotate + 'rad'
-    paper.view.viewSize = new paper.Size(canvas.scaledWidth, canvas.scaledHeight)
-    raster.value.position = paper.view.center
-
-    backgroundLayer.value!.locked = true
     arrowLayer.value = new paper.Layer()
 
-    drawPath()
-
-    // 绘制画布完成
-    canvas.isWellDrawn = true
+    updateCanvas()
   }
+}
+
+const updateCanvas = () => {
+  console.log("触发 updateCanvas")
+  if (canvas.isWellDrawn || !canvasEl.value || !raster.value) return
+  console.log("进行 updateCanvas")
+
+  canvasEl.value.width = canvas.scaledWidth
+  canvasEl.value.height = canvas.scaledHeight
+  canvasEl.value.style.width = canvas.scaledWidth + 'px'
+  canvasEl.value.style.height = canvas.scaledHeight + 'px'
+  canvasEl.value.style.rotate = canvas.rotate + 'rad'
+  canvasEl.value.style.scale = canvas.scale + ''
+  paper.view.viewSize = new paper.Size(canvas.scaledWidth, canvas.scaledHeight)
+  raster.value.position = paper.view.center
+
+  drawPath()
+
+  // 绘制画布完成
+  canvas.isWellDrawn = true
 }
 
 // 计算缩放后的 Point
 const scalePoint = (point: paper.Point): paper.Point => {
-  const newX: number = paper.view.center.x + (point.x - canvas.width / 2) * canvas.scale
-  const newY: number = paper.view.center.y + (point.y - canvas.height / 2) * canvas.scale
+  const newX: number = paper.view.center.x + (point.x - canvas.width / 2)
+  const newY: number = paper.view.center.y + (point.y - canvas.height / 2)
   return new paper.Point(newX, newY)
 }
 
 // 绘制路径
 const drawPath = async () => {
-  if (!profile.showPath || !arrowLayer) return
+  if (!profile.showPath || !arrowLayer.value) return
 
   // 清除箭头图层的内容
-  arrowLayer.value?.removeChildren()
+  arrowLayer.value.removeChildren()
 
   // 重新绘制路径
   const path = new paper.Path()
@@ -158,16 +165,27 @@ onUnmounted(() => {
   clearInterval(updater.value)
 })
 
-watch(() => canvas.isWellDrawn, initCanvas)
+watch(() => canvas.isWellDrawn, () => {
+  updateCanvas()
+})
+
 watch(() => profile.showPath, () => {
   if (arrowLayer) arrowLayer.value?.removeChildren()
   drawPath()
 })
 
+// 拖动处理
+const x = ref(0)
+const y = ref(0)
+
 const draggbleLayer = ref<HTMLParagraphElement>()
-const { style, x, y } = useDraggable(draggbleLayer, {
+useDraggable(draggbleLayer, {
   onStart() {
     canvas.isChanging = true
+  },
+  onMove(position: Position, event: PointerEvent) {
+    x.value = position.x
+    y.value = position.y
   },
   onEnd() {
     canvas.isChanging = false
@@ -178,7 +196,11 @@ const { style, x, y } = useDraggable(draggbleLayer, {
 <template>
   <!-- 被拖动的元素 -->
   <!-- 用于解决旋转导致的拖动点变化问题 -->
-  <div class="fixed -z-30 cursor-move" style="height: 1000vh; width: 1000vw;" ref="draggbleLayer" :style="style"></div>
+  <div class="fixed -z-30 cursor-move" style="height: 1000vh; width: 1000vw;" ref="draggbleLayer"
+    :style="{ 'left': x + 'px', 'top': y + 'px' }"></div>
   <canvas v-show="isWellDrawn" :style="{ 'left': x + 'px', 'top': y + 'px' }" ref="canvasEl"
     class="fixed -z-40"></canvas>
 </template>
+
+<style lang="css" scoped>
+</style>
