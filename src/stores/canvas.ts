@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-const scaleLowerBound = 1
+let scaleLowerBound = 1
 const scaleUpperBound = 3
 
 export const useCanvasStore = defineStore('canvas', () => {
@@ -15,15 +15,18 @@ export const useCanvasStore = defineStore('canvas', () => {
     const lastScale = ref(1)
     const rotate = ref(0)
     const lastRotate = ref(0)
-    const isUpdate = ref(true)
+    const isWellDrawn = ref(false)
+    const isChanging = ref(false)
 
     const setup = (canvas: HTMLCanvasElement, raster: paper.Raster) => {
         if (raster.loaded) {
-            canvasEl.value = canvas
             width.value = raster.width
             height.value = raster.height
+            canvasEl.value = canvas
+            scale.value = Math.max(window.innerWidth / width.value, window.innerHeight / height.value)
+            scaleLowerBound = scale.value
             isSetup.value = true
-            isUpdate.value = false
+            isWellDrawn.value = false
         } else {
             console.log("尝试加载未初始化完成的 paper.Raster")
         }
@@ -38,7 +41,7 @@ export const useCanvasStore = defineStore('canvas', () => {
         if (changedValue < scaleLowerBound) changedValue = scaleLowerBound
         lastScale.value = scale.value
         scale.value = changedValue
-        isUpdate.value = false
+        isWellDrawn.value = false
     }
 
     const changeRotate = (amount: number) => {
@@ -47,7 +50,7 @@ export const useCanvasStore = defineStore('canvas', () => {
         if (changedValue < 0) changedValue = 2 * Math.PI + changedValue
         lastRotate.value = rotate.value
         rotate.value = changedValue
-        isUpdate.value = false
+        isWellDrawn.value = false
     }
 
     return {
@@ -61,9 +64,10 @@ export const useCanvasStore = defineStore('canvas', () => {
         lastScale,
         rotate,
         lastRotate,
-        isUpdate,
+        isWellDrawn,
         changeScale,
         changeRotate,
-        setup
+        setup,
+        isChanging
     }
 })

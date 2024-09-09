@@ -20,6 +20,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@vue/language-server": "^2.1.6",
+    "@vueuse/core": "^11.0.3",
     "floating-vue": "^5.2.2",
     "paper": "^0.12.18",
     "pinia": "^2.2.2",

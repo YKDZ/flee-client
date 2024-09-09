@@ -5,44 +5,49 @@ import { useCanvasStore } from '../stores/canvas'
 import { useMapStore } from '../stores/map'
 import { useProfileStore } from '../stores/profile'
 import { storeToRefs } from 'pinia'
+import mapURL from '/test-map.png'
+import { useDraggable } from '@vueuse/core'
 
 const canvas = useCanvasStore()
 const profile = useProfileStore()
 const map = useMapStore()
-const canvasEl = ref<HTMLCanvasElement | null>(null)
+const canvasEl = ref<HTMLCanvasElement>()
 const raster = ref<paper.Raster>()
 const backgroundLayer = ref<paper.Layer>()
 const arrowLayer = ref<paper.Layer>()
-const { isUpdate } = storeToRefs(canvas)
+const { isWellDrawn } = storeToRefs(canvas)
 
-// 更新画布，创建背景图层和箭头图层
-const updateCanvas = () => {
-  paper.setup(canvasEl.value as HTMLCanvasElement)
+// 更新画布
+const initCanvas = () => {
+  if (canvas.isWellDrawn || !canvasEl.value) return
+  paper.setup(canvasEl.value)
   // 创建背景图层
   backgroundLayer.value = new paper.Layer()
-  raster.value = new paper.Raster('test-map.png')
-  
-  // 应用图片缩放
-  raster.value?.scale(canvas.scale)
+  raster.value = new paper.Raster(mapURL)
+
   raster.value.onLoad = () => {
-    if (canvasEl.value && raster.value) {
-      canvas.setup(canvasEl.value, raster.value as paper.Raster)
-      canvasEl.value.width = canvas.scaledWidth
-      canvasEl.value.height = canvas.scaledHeight
-      canvasEl.value.style.width = canvas.scaledWidth + 'px'
-      canvasEl.value.style.height = canvas.scaledHeight + 'px'
-      paper.view.rotate(canvas.rotate * (180 / Math.PI)) // 弧度转角度
-      paper.view.viewSize = new paper.Size(canvas.scaledWidth, canvas.scaledHeight)
-      raster.value.position = paper.view.center
+    if (!canvasEl.value || !raster.value) return
+
+    if (!canvas.isSetup) {
+      canvas.setup(canvasEl.value, raster.value)
     }
 
-    // 将背景层锁定，防止误操作
-    backgroundLayer.value!.locked = true
+    raster.value?.scale(canvas.scale)
+    canvasEl.value.width = canvas.scaledWidth
+    canvasEl.value.height = canvas.scaledHeight
+    canvasEl.value.style.width = canvas.scaledWidth + 'px'
+    canvasEl.value.style.height = canvas.scaledHeight + 'px'
+    canvasEl.value.style.rotate = canvas.rotate + 'rad'
+    paper.view.viewSize = new paper.Size(canvas.scaledWidth, canvas.scaledHeight)
+    raster.value.position = paper.view.center
 
-    // 创建箭头图层
+    backgroundLayer.value!.locked = true
     arrowLayer.value = new paper.Layer()
+
     drawPath()
-    canvas.isUpdate = true
+
+    // 绘制画布完成
+    canvas.isWellDrawn = true
   }
 }
 
@@ -56,7 +61,7 @@ const scalePoint = (point: paper.Point): paper.Point => {
 // 绘制路径
 const drawPath = async () => {
   if (!profile.showPath || !arrowLayer) return
-  
+
   // 清除箭头图层的内容
   arrowLayer.value?.removeChildren()
 
@@ -145,7 +150,7 @@ const drawArrow = (
 let updater = ref<number>()
 
 onMounted(() => {
-  updateCanvas()
+  initCanvas()
   updater.value = setInterval(drawPath, 1000)
 })
 
@@ -153,13 +158,27 @@ onUnmounted(() => {
   clearInterval(updater.value)
 })
 
-watch(() => canvas.isUpdate, updateCanvas)
+watch(() => canvas.isWellDrawn, initCanvas)
 watch(() => profile.showPath, () => {
   if (arrowLayer) arrowLayer.value?.removeChildren()
   drawPath()
 })
+
+const draggbleLayer = ref<HTMLParagraphElement>()
+const { style, x, y } = useDraggable(draggbleLayer, {
+  onStart() {
+    canvas.isChanging = true
+  },
+  onEnd() {
+    canvas.isChanging = false
+  }
+})
 </script>
 
 <template>
-  <canvas v-show="isUpdate" id="canvas" ref="canvasEl" class="-z-50"></canvas>
+  <!-- 被拖动的元素 -->
+  <!-- 用于解决旋转导致的拖动点变化问题 -->
+  <div class="fixed -z-30 cursor-move" style="height: 1000vh; width: 1000vw;" ref="draggbleLayer" :style="style"></div>
+  <canvas v-show="isWellDrawn" :style="{ 'left': x + 'px', 'top': y + 'px' }" ref="canvasEl"
+    class="fixed -z-40"></canvas>
 </template>
