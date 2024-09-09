@@ -15,9 +15,9 @@ const canvasEl = ref<HTMLCanvasElement>()
 const raster = ref<paper.Raster>()
 const backgroundLayer = ref<paper.Layer>()
 const arrowLayer = ref<paper.Layer>()
-const { isWellDrawn } = storeToRefs(canvas)
+const { leftOffset, topOffset } = storeToRefs(canvas)
 
-// 更新画布
+// 初始化画布
 const initCanvas = () => {
   if (canvas.isWellDrawn || !canvasEl.value) return
   paper.setup(canvasEl.value)
@@ -39,22 +39,21 @@ const initCanvas = () => {
 }
 
 const updateCanvas = () => {
-  console.log("触发 updateCanvas")
   if (canvas.isWellDrawn || !canvasEl.value || !raster.value) return
-  console.log("进行 updateCanvas")
 
   canvasEl.value.width = canvas.scaledWidth
   canvasEl.value.height = canvas.scaledHeight
   canvasEl.value.style.width = canvas.scaledWidth + 'px'
   canvasEl.value.style.height = canvas.scaledHeight + 'px'
-  canvasEl.value.style.rotate = canvas.rotate + 'rad'
-  canvasEl.value.style.scale = canvas.scale + ''
+
+  // 旋转和缩放
+  canvasEl.value.style.transform = `rotate(${canvas.rotate}rad) scale(${canvas.scale})`
+
   paper.view.viewSize = new paper.Size(canvas.scaledWidth, canvas.scaledHeight)
   raster.value.position = paper.view.center
 
   drawPath()
 
-  // 绘制画布完成
   canvas.isWellDrawn = true
 }
 
@@ -175,17 +174,14 @@ watch(() => profile.showPath, () => {
 })
 
 // 拖动处理
-const x = ref(0)
-const y = ref(0)
-
 const draggbleLayer = ref<HTMLParagraphElement>()
 useDraggable(draggbleLayer, {
   onStart() {
     canvas.isChanging = true
   },
-  onMove(position: Position, event: PointerEvent) {
-    x.value = position.x
-    y.value = position.y
+  onMove(position: Position) {
+    canvas.leftOffset = position.x
+    canvas.topOffset = position.y
   },
   onEnd() {
     canvas.isChanging = false
@@ -197,8 +193,8 @@ useDraggable(draggbleLayer, {
   <!-- 被拖动的元素 -->
   <!-- 用于解决旋转导致的拖动点变化问题 -->
   <div class="fixed -z-30 cursor-move" style="height: 1000vh; width: 1000vw;" ref="draggbleLayer"
-    :style="{ 'left': x + 'px', 'top': y + 'px' }"></div>
-  <canvas v-show="isWellDrawn" :style="{ 'left': x + 'px', 'top': y + 'px' }" ref="canvasEl"
+    :style="{ 'left': leftOffset + 'px', 'top': topOffset + 'px' }"></div>
+  <canvas :style="{ 'left': leftOffset + 'px', 'top': topOffset + 'px' }" ref="canvasEl"
     class="fixed -z-40"></canvas>
 </template>
 

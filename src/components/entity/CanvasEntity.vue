@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch, watchEffect } from 'vue'
+import { onMounted, ref, watchEffect } from 'vue'
 import { useCanvasStore } from '../../stores/canvas'
 import { storeToRefs } from 'pinia';
 

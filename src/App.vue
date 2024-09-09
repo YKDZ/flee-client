@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Canvas from './components/Canvas.vue'
-import RotateBar from './components/RotateBar.vue';
-import ToolBar from './components/ToolBar.vue';
+import RotateBar from './components/RotateBar.vue'
+import ToolBar from './components/ToolBar.vue'
 import ZoomBar from './components/ZoomBar.vue'
 import { defineAsyncComponent } from 'vue'
 
