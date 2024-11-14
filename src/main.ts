@@ -9,6 +9,7 @@ import { fab } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { createPinia } from 'pinia'
 import FloatingVue from 'floating-vue'
+import { GesturePlugin } from '@vueuse/gesture'
 
 const pinia = createPinia()
 
@@ -18,5 +19,6 @@ library.add(fas, far, fab)
 createApp(App)
     .use(pinia)
     .use(FloatingVue)
+    .use(GesturePlugin)
     .component('font-awesome-icon', FontAwesomeIcon)
     .mount('#app')

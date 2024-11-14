@@ -8,7 +8,6 @@ const props = defineProps<{
     y: number
 }>()
 
-const center = ref<HTMLParagraphElement>()
 const iconRef = ref<HTMLParagraphElement>()
 const canvas = useCanvasStore()
 const { isWellDrawn } = storeToRefs(canvas)
@@ -16,7 +15,7 @@ const { isWellDrawn } = storeToRefs(canvas)
 // 位置是否已经更新完毕
 const isPrepared = ref(false)
 
-const updatePos = async () => {
+const updatePos = () => {
     if (!canvas.isWellDrawn) return
     if (!canvas.isSetup || !canvas.canvasEl || !iconRef.value) {
         console.log("初始化错误或指定节点不存在")
@@ -31,10 +30,6 @@ const updatePos = async () => {
     // 旋转中心位置
     const rotateCenterScreenX = canvas.scaledWidth / 2 + offsetX
     const rotateCenterScreenY = canvas.scaledHeight / 2 + offsetY
-    if (center.value) {
-        center.value.style.left = rotateCenterScreenX + 'px'
-        center.value.style.top = rotateCenterScreenY + 'px'
-    }
     // 实体位置
     const nodeScreenX = props.x * canvas.scale + offsetX
     const nodeScreenY = props.y * canvas.scale + offsetY
@@ -60,7 +55,7 @@ setInterval(() => {
     if (canvas.isChanging) {
         updatePos()
     }
-}, 1)
+}, 10)
 // 禁止更新方案
 // watch(() => canvas.isChanging, () => {
 //     if (canvas.isChanging) {

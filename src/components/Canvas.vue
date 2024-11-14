@@ -6,7 +6,7 @@ import { useMapStore } from '../stores/map'
 import { useProfileStore } from '../stores/profile'
 import { storeToRefs } from 'pinia'
 import mapURL from '/test-map.png'
-import { Position, useDraggable } from '@vueuse/core'
+import { useDrag } from '@vueuse/gesture'
 
 const canvas = useCanvasStore()
 const profile = useProfileStore()
@@ -173,30 +173,44 @@ watch(() => profile.showPath, () => {
   drawPath()
 })
 
-// 拖动处理
-const draggbleLayer = ref<HTMLParagraphElement>()
-useDraggable(draggbleLayer, {
-  onStart() {
+// 拖动
+let lastDraggingResult = { x: 0, y: 0 }
+// x, y 每次都从 0 开始计算
+useDrag(({ movement: [x, y], dragging }) => {
+  if (dragging) {
     canvas.isChanging = true
-  },
-  onMove(position: Position) {
-    canvas.leftOffset = position.x
-    canvas.topOffset = position.y
-  },
-  onEnd() {
+    canvas.leftOffset = x + lastDraggingResult.x
+    canvas.topOffset = y + lastDraggingResult.y
+  } else {
     canvas.isChanging = false
+    lastDraggingResult.x = canvas.leftOffset
+    lastDraggingResult.y = canvas.topOffset
   }
+}, {
+  domTarget: canvasEl
 })
+// 双指缩放
+// usePinch(({ offset: [d, a], pinching }) => {
+//   if (pinching) {
+//     canvas.isChanging = true
+//     canvas.scale += d / 100000
+//   } else {
+//     canvas.isChanging = false
+//   }
+// }, {
+//   domTarget: draggbleLayer,
+//   eventOptions: {
+//     passive: false
+//   }
+// })
 </script>
 
 <template>
   <!-- 被拖动的元素 -->
   <!-- 用于解决旋转导致的拖动点变化问题 -->
-  <div class="fixed -z-30 cursor-move" style="height: 1000vh; width: 1000vw;" ref="draggbleLayer"
-    :style="{ 'left': leftOffset + 'px', 'top': topOffset + 'px' }"></div>
-  <canvas :style="{ 'left': leftOffset + 'px', 'top': topOffset + 'px' }" ref="canvasEl"
-    class="fixed -z-40"></canvas>
+  <!-- <div class="fixed -z-30 cursor-move" style="height: 1000vh; width: 1000vw;" ref="draggbleLayer"
+    :style="{ 'left': leftOffset + 'px', 'top': topOffset + 'px' }"></div> -->
+  <canvas :style="{ 'left': leftOffset + 'px', 'top': topOffset + 'px' }" ref="canvasEl" class="fixed -z-40"></canvas>
 </template>
 
-<style lang="css" scoped>
-</style>
+<style lang="css" scoped></style>

@@ -1,5 +1,8 @@
 # Flee Client
 
+> 需使用 Three.js 重置\
+> 移动端原生应用难以依靠转写，因为基于 Canvas 和 WebGL 的绘图在移动端表现差
+
 ![PC 端效果图](docs/showcase-pc.png)
 
 ## Todo
